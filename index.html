@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Board Conductor — Christensen × Lakhani AI Strategy Review</title>
+  <meta name="description" content="A free board-level AI skill that evaluates any company through four lenses: Wedge, Learning Engine, Data Laboratory, and Board Conductor. Paste into Claude, ChatGPT, or Gemini." />
+  <meta property="og:title" content="Board Conductor — AI Strategy Review Skill" />
+  <meta property="og:description" content="Are we learning fast enough to discover, prove, and scale the right wedge? Free board-level AI skill from V.S. Foundry." />
+  <meta property="og:url" content="https://vsfoundry.com/skills/board-conductor" />
+  <link rel="canonical" href="https://vsfoundry.com/skills/board-conductor" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0a0a;
+      --surface:   #111111;
+      --border:    #222222;
+      --border-hi: #333333;
+      --text:      #e8e8e8;
+      --muted:     #888888;
+      --primary:   #5b8af5;
+      --primary-bg:#5b8af520;
+      --success:   #4ade80;
+      --radius:    10px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    nav a { color: var(--muted); text-decoration: none; font-size: 14px; }
+    nav a:hover { color: var(--text); }
+
+    .badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border: 1px solid var(--border-hi);
+      border-radius: 99px;
+      color: var(--muted);
+      letter-spacing: 0.03em;
+    }
+
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 64px 24px 80px;
+    }
+
+    section { margin-bottom: 72px; }
+
+    .label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+    }
+
+    blockquote {
+      border-left: 2px solid var(--primary);
+      padding-left: 20px;
+      font-size: 20px;
+      font-style: italic;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .hero-desc {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 520px;
+      line-height: 1.7;
+    }
+
+    .lenses { display: grid; gap: 12px; }
+
+    .lens {
+      display: flex;
+      gap: 16px;
+      padding: 18px 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      transition: border-color 0.15s;
+    }
+
+    .lens:hover { border-color: var(--border-hi); }
+
+    .lens-num {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary-bg);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .lens-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+    .lens-q { font-size: 13px; color: var(--muted); font-style: italic; margin-bottom: 2px; }
+    .lens-desc { font-size: 12px; color: var(--muted); }
+
+    .output-list { list-style: none; display: grid; gap: 10px; }
+
+    .output-list li {
+      display: flex;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .output-list li::before {
+      content: "→";
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    /* CTA card */
+    .cta-card {
+      border: 1px solid var(--border-hi);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 32px;
+    }
+
+    .cta-card h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+    .cta-desc { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+
+    .btn-group { display: flex; flex-direction: column; gap: 10px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.15s, background 0.15s;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      width: 100%;
+      max-width: 280px;
+      justify-content: center;
+    }
+
+    .btn-primary:hover { opacity: 0.88; }
+
+    .btn-primary.success {
+      background: var(--success);
+      color: #000;
+      cursor: default;
+    }
+
+    .platform-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border-hi);
+      font-size: 13px;
+      padding: 7px 14px;
+    }
+
+    .btn-outline:hover { color: var(--text); border-color: var(--muted); }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 24px 0 20px;
+    }
+
+    .notify-label { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+
+    .email-form { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .email-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 8px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border-hi);
+      border-radius: 7px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .email-input:focus { border-color: var(--primary); }
+    .email-input::placeholder { color: var(--muted); }
+
+    .btn-notify {
+      background: transparent;
+      border: 1px solid var(--border-hi);
+      color: var(--muted);
+      font-size: 13px;
+      padding: 8px 16px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-notify:hover { color: var(--text); border-color: var(--muted); }
+    .btn-notify:disabled { opacity: 0.5; cursor: default; }
+
+    .notify-success { font-size: 14px; color: var(--success); }
+    .notify-error { font-size: 12px; color: #f87171; }
+
+    /* How to use */
+    .steps { list-style: none; display: grid; gap: 14px; }
+
+    .steps li {
+      display: flex;
+      gap: 16px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border: 1px solid var(--border-hi);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    /* Article card */
+    .article-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 24px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-decoration: none;
+      transition: border-color 0.15s;
+    }
+
+    .article-card:hover { border-color: var(--border-hi); }
+
+    .article-card-text { flex: 1; }
+    .article-card-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+    .article-card-desc { font-size: 12px; color: var(--muted); }
+    .article-card-arrow { color: var(--muted); font-size: 18px; }
+
+    footer {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    footer a { color: var(--muted); }
+    footer a:hover { color: var(--text); }
+
+    @media (max-width: 480px) {
+      .btn-primary { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="https://vsfoundry.com">V.S. Foundry</a>
+  <span class="badge">Board Skill · B0.1b</span>
+</nav>
+
+<main>
+
+  <!-- Hero -->
+  <section>
+    <p class="label">Board Conductor · Skill B0</p>
+    <h1>Christensen × Lakhani<br>AI Strategy Review</h1>
+    <blockquote>Are we learning fast enough to discover, prove, and scale the right wedge?</blockquote>
+    <p class="hero-desc">
+      A board-level diagnostic combining Clayton Christensen's disruption theory with Karim Lakhani's
+      AI-era reframe of competitive advantage. Paste it into any AI — Claude, ChatGPT, Gemini —
+      and attach your deck or business plan.
+    </p>
+  </section>
+
+  <!-- Four Lenses -->
+  <section>
+    <p class="label">Four Lenses</p>
+    <div class="lenses">
+      <div class="lens">
+        <div class="lens-num">1</div>
+        <div>
+          <div class="lens-name">Wedge</div>
+          <div class="lens-q">Are we discovering or proving the right narrow market?</div>
+          <div class="lens-desc">ICP clarity, urgency signals, market pull, early repeatability</div>
+        </div>
+      </div>
+      <div class="lens">
+        <div class="lens-num">2</div>
+        <div>
+          <div class="lens-name">Learning Engine</div>
+          <div class="lens-q">Is the company learning faster than competitors?</div>
+          <div class="lens-desc">Feedback loops, signal capture, experimentation cadence, AI leverage</div>
+        </div>
+      </div>
+      <div class="lens">
+        <div class="lens-num">3</div>
+        <div>
+          <div class="lens-name">Data Laboratory</div>
+          <div class="lens-q">Is early traction becoming reusable knowledge?</div>
+          <div class="lens-desc">Data assets, workflow documentation, playbooks, automation</div>
+        </div>
+      </div>
+      <div class="lens">
+        <div class="lens-num">4</div>
+        <div>
+          <div class="lens-name">Board Conductor</div>
+          <div class="lens-q">Is the board asking the right questions?</div>
+          <div class="lens-desc">Decision quality, risk flags, scaling readiness, AI governance</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Output -->
+  <section>
+    <p class="label">Output</p>
+    <ul class="output-list">
+      <li>Executive diagnosis — Discovery Mode or Execution Mode, and why it matters</li>
+      <li>Wedge Assessment — current wedge, strength, weakness, recommended refinement</li>
+      <li>Learning Engine + Data Laboratory assessments</li>
+      <li>Scored rubric across 7 dimensions (out of 35)</li>
+      <li>12 risk flags — named, defined, with board questions for each</li>
+      <li>7 board questions specific to this company</li>
+      <li>30/60/90-day action plan</li>
+    </ul>
+  </section>
+
+  <!-- CTA -->
+  <section>
+    <div class="cta-card">
+      <h2>Get the skill</h2>
+      <p class="cta-desc">
+        Copy the full skill prompt to your clipboard, then paste it into Claude, ChatGPT, or
+        Gemini and attach your deck.
+      </p>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" id="copyBtn" onclick="copySkill()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          Copy Full Skill
+        </button>
+
+        <div class="platform-row">
+          <button class="btn btn-outline" onclick="openPlatform('claude')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+            Open Claude
+          </button>
+          <button class="btn btn-outline" onclick="openPlatform('chatgpt')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+            Open ChatGPT
+          </button>
+          <a class="btn btn-outline" href="https://raw.githubusercontent.com/EdwardFBoyle/board-conductor/main/skills/B0.1b-christensen-lakhani-lite.md" target="_blank">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+            View raw file
+          </a>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <p class="notify-label">Get new board skills in your inbox — one per week for 12 weeks.</p>
+      <div id="emailSection">
+        <form class="email-form" onsubmit="submitEmail(event)">
+          <input class="email-input" type="email" id="emailInput" placeholder="your@email.com" required />
+          <button class="btn-notify" type="submit" id="notifyBtn">Notify me</button>
+        </form>
+        <p id="emailMsg" style="display:none; margin-top:8px;"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How to use -->
+  <section>
+    <p class="label">How to use it</p>
+    <ol class="steps">
+      <li>
+        <span class="step-num">1</span>
+        Copy the skill using the button above.
+      </li>
+      <li>
+        <span class="step-num">2</span>
+        Open Claude, ChatGPT, or Gemini and paste the skill into the chat.
+      </li>
+      <li>
+        <span class="step-num">3</span>
+        Attach your pitch deck, business plan, or board memo — or answer the interview questions interactively.
+      </li>
+      <li>
+        <span class="step-num">4</span>
+        Receive a complete Board Conductor Review: scored rubric, risk flags, 7 board questions, and a 30/60/90-day action plan.
+      </li>
+    </ol>
+  </section>
+
+  <!-- Article -->
+  <section>
+    <a class="article-card" href="https://vsfoundry.com/articles/b0-the-new-board-question" target="_blank">
+      <div class="article-card-text">
+        <div class="article-card-title">Read the full article</div>
+        <div class="article-card-desc">The strategic theory behind the four-lens framework — Christensen, Lakhani, and the AI-era reframe of competitive advantage.</div>
+      </div>
+      <span class="article-card-arrow">→</span>
+    </a>
+  </section>
+
+</main>
+
+<footer>
+  <span>
+    Skill B0.1b · Christensen × Lakhani ·
+    <a href="https://github.com/EdwardFBoyle/board-conductor" target="_blank">Open source on GitHub</a>
+  </span>
+  <span>© 2026 V.S. Foundry</span>
+</footer>
+
+<script>
+  const SKILL_RAW_URL = "https://raw.githubusercontent.com/EdwardFBoyle/board-conductor/main/skills/B0.1b-christensen-lakhani-lite.md";
+  const SUPABASE_URL = "https://YOUR_SUPABASE_PROJECT.supabase.co"; // replace on deploy
+  const SUPABASE_ANON_KEY = "YOUR_ANON_KEY";                         // replace on deploy
+
+  let cachedSkill = null;
+
+  function logEvent(type, extra = {}) {
+    const payload = {
+      skill_id: "B0.1b",
+      event_type: type,
+      metadata: {
+        referrer: document.referrer || null,
+        utm_source: new URLSearchParams(location.search).get("utm_source"),
+        ...extra,
+      },
+    };
+    if (SUPABASE_URL.includes("YOUR_")) return; // skip if not configured
+    fetch(`${SUPABASE_URL}/rest/v1/e_skill_events`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        "Prefer": "return=minimal",
+      },
+      body: JSON.stringify(payload),
+    }).catch(() => {});
+  }
+
+  async function copySkill() {
+    const btn = document.getElementById("copyBtn");
+    try {
+      if (!cachedSkill) {
+        btn.textContent = "Fetching…";
+        const res = await fetch(SKILL_RAW_URL);
+        cachedSkill = await res.text();
+      }
+      await navigator.clipboard.writeText(cachedSkill);
+      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Copied — paste into any AI`;
+      btn.classList.add("success");
+      btn.disabled = true;
+      logEvent("copy");
+      setTimeout(() => {
+        btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy Full Skill`;
+        btn.classList.remove("success");
+        btn.disabled = false;
+      }, 3000);
+    } catch {
+      window.open(SKILL_RAW_URL, "_blank");
+      logEvent("copy_fallback");
+    }
+  }
+
+  function openPlatform(platform) {
+    const urls = { claude: "https://claude.ai", chatgpt: "https://chatgpt.com" };
+    logEvent("platform_open", { platform });
+    window.open(urls[platform], "_blank");
+  }
+
+  async function submitEmail(e) {
+    e.preventDefault();
+    const email = document.getElementById("emailInput").value.trim();
+    const btn = document.getElementById("notifyBtn");
+    const msg = document.getElementById("emailMsg");
+    if (!email) return;
+    btn.disabled = true;
+    btn.textContent = "Saving…";
+
+    const payload = {
+      skill_id: "B0.1b",
+      event_type: "email_capture",
+      email,
+      metadata: {
+        referrer: document.referrer || null,
+        utm_source: new URLSearchParams(location.search).get("utm_source"),
+      },
+    };
+
+    let ok = false;
+    if (!SUPABASE_URL.includes("YOUR_")) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/e_skill_events`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Prefer": "return=minimal",
+          },
+          body: JSON.stringify(payload),
+        });
+        ok = res.ok;
+      } catch { ok = false; }
+    } else {
+      ok = true; // dev mode — pretend it worked
+    }
+
+    msg.style.display = "block";
+    if (ok) {
+      msg.style.color = "#4ade80";
+      msg.textContent = "You're in. We'll send B1 when it's ready.";
+      document.querySelector(".email-form").style.display = "none";
+    } else {
+      msg.style.color = "#f87171";
+      msg.textContent = "Something went wrong — try again.";
+      btn.disabled = false;
+      btn.textContent = "Notify me";
+    }
+  }
+
+  // Log page view on load
+  window.addEventListener("load", () => logEvent("page_view"));
+</script>
+</body>
+</html>
